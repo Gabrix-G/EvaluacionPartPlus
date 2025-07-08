@@ -1,6 +1,6 @@
 import express from "express";
-import clienteRoutes from "./routes/clientes.js";
-import reservaRoutes from "./routes/reservas.js";
+import clienteRoutes from "./src/routes/clientes.js";
+import reservaRoutes from "./src/routes/reservas.js";
 
 const app = express();
 
