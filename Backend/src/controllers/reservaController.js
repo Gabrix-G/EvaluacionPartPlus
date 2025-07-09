@@ -1,40 +1,14 @@
-const Reserva = require('../models/Reserva');
-
-//010101010101010101010100101
-// Crear una nueva reserva 10
-//010101010101010101010100101
-
+//100101101010101010101101010111
+// Array de metodos (C R U D) 01
+//001011010101010101011010101111
+const reservaController = {};
+import Reserva from '../models/Reserva.js';
 import Cliente from "../models/Cliente.js";
-// Crear una nueva reserva con ////validaciones////
-exports.createReserva = async (req, res) => {
-  try {
-    const { clientId, vehicle, service, status } = req.body;
-    // Validar campos obligatorios
-    if (!clientId || !vehicle || !service) {
-      return res.status(400).json({ error: "clientId, vehicle y service son obligatorios" });
-    }
-    // Validar formato de vehicle letras y números, mínimo 2 caracteres)
-    const vehicleRegex = /^[A-Za-z0-9\s-]{2,}$/;
-    if (!vehicleRegex.test(vehicle)) {
-      return res.status(400).json({ error: "Formato de vehículo inválido" });
-    }
-    // Verificar existencia del cliente
-    const cliente = await Cliente.findById(clientId);
-    if (!cliente) {
-      return res.status(404).json({ error: "Cliente no encontrado" });
-    }
-    const reserva = new Reserva({ clientId, vehicle, service, status });
-    await reserva.save();
-    res.status(201).json(reserva);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
 
-//0101010101010101010101001011010101010101010101010010101010110
-// Obtener todas las reservas o las de un cliente específico 10
-//0101010101010101010101001011010101010101010101010010101010110
-exports.getReservas = async (req, res) => {
+//001011010
+// SELECT 0
+//001011010
+reservaController.getReservas = async (req, res) => {
   try {
     const { clientId } = req.query;
     let reservas;
@@ -45,46 +19,75 @@ exports.getReservas = async (req, res) => {
     }
     res.json(reservas);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-//010101010101010101010100101110
-// Obtener una reserva por ID 10
-//010101010101010101010010101010
-exports.getReservaById = async (req, res) => {
+//001011010101010
+// SELECT BY ID 0
+//001011010101010
+reservaController.getReservaById = async (req, res) => {
   try {
     const reserva = await Reserva.findById(req.params.id).populate('clientId');
-    if (!reserva) return res.status(404).json({ error: 'Reserva no encontrada' });
+    if (!reserva) return res.status(404).json({ message: 'Reserva dont find' });
     res.json(reserva);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-//01010101010101010101001011
-// Actualizar una reserva 01
-//01010101010101010101001011
-exports.updateReserva = async (req, res) => {
+//0010110101
+// INSERT 10
+//0010110101
+reservaController.createReserva = async (req, res) => {
   try {
-    const reserva = await Reserva.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!reserva) return res.status(404).json({ error: 'Reserva no encontrada' });
-    res.json(reserva);
+    const { clientId, vehicle, service, status } = req.body;
+    if (!clientId || !vehicle || !service) {
+      return res.status(400).json({ message: "clientId, vehicle y service son obligatorios" });
+    }
+    const vehicleRegex = /^[A-Za-z0-9\s-]{2,}$/;
+    if (!vehicleRegex.test(vehicle)) {
+      return res.status(400).json({ message: "Formato de vehículo inválido" });
+    }
+    const cliente = await Cliente.findById(clientId);
+    if (!cliente) {
+      return res.status(404).json({ message: "Cliente no encontrado" });
+    }
+    const newReserva = new Reserva({ clientId, vehicle, service, status });
+    await newReserva.save();
+    res.json({ message: "Reserva saved" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-//010101010101010101010010
-// Eliminar una reserva 10
-//010101010101010101010010
-
-exports.deleteReserva = async (req, res) => {
-  try {
-    const reserva = await Reserva.findByIdAndDelete(req.params.id);
-    if (!reserva) return res.status(404).json({ error: 'Reserva no encontrada' });
-    res.json({ message: 'Reserva eliminada' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+//0010110101
+// DELETE 01
+//0010110101
+reservaController.deleteReserva = async (req, res) => {
+  const deletedReserva = await Reserva.findByIdAndDelete(req.params.id);
+  if (!deletedReserva) {
+    return res.status(404).json({ message: "Reserva dont find" });
   }
+  res.json({ message: "Reserva deleted" });
 };
+
+//0010110101
+// UPDATE 01
+//0010110101
+reservaController.updateReserva = async (req, res) => {
+  const { clientId, vehicle, service, status } = req.body;
+  await Reserva.findByIdAndUpdate(
+    req.params.id,
+    {
+      clientId,
+      vehicle,
+      service,
+      status
+    },
+    { new: true }
+  );
+  res.json({ message: "Reserva updated" });
+};
+
+export default reservaController;
